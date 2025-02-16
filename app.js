@@ -26,7 +26,6 @@ function initialize() {
     container.appendChild(card);
   });
 
-  // Set up submit button
   document
     .getElementById('submitBtn')
     .addEventListener('click', handleSubmission);
@@ -110,18 +109,11 @@ function updateConfidence(index, value) {
 }
 
 function handleSubmission() {
-  // Hide main content
   document.getElementById('mainContent').style.display = 'none';
-
-  // Show and center completion page
   const completionPage = document.getElementById('completionPage');
   completionPage.style.display = 'flex';
-
-  // Generate and display key
   const verificationKey = generateVerificationKey();
   document.getElementById('verificationKey').textContent = verificationKey;
-
-  // Add keyboard shortcut for better UX
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') location.reload();
   });
@@ -137,19 +129,13 @@ function generateVerificationKey() {
   return key;
 }
 
-// Clipboard functionality
 document.getElementById('copyButton').addEventListener('click', () => {
   const key = document.getElementById('verificationKey').textContent;
-
   if (navigator.clipboard) {
     navigator.clipboard
       .writeText(key)
-      .then(() => {
-        showCopyFeedback();
-      })
-      .catch(() => {
-        manualCopyFallback(key);
-      });
+      .then(showCopyFeedback)
+      .catch(() => manualCopyFallback(key));
   } else {
     manualCopyFallback(key);
   }
@@ -160,7 +146,6 @@ function manualCopyFallback(key) {
   textArea.value = key;
   document.body.appendChild(textArea);
   textArea.select();
-
   try {
     document.execCommand('copy');
     showCopyFeedback();
@@ -178,5 +163,46 @@ function showCopyFeedback() {
   }, 2000);
 }
 
-// Initialize app
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  const key = 'user-' + Math.random().toString(36).substring(2, 10);
+  const content = document.getElementById('mainContent').innerHTML;
+
+  try {
+    const response = await fetch(
+      'https://cse598-011-hw2-backend.onrender.com/save',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, content }),
+      }
+    );
+
+    const result = await response.json();
+    document.getElementById('verificationKey').innerText = key;
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('completionPage').style.display = 'block';
+  } catch (error) {
+    console.error('Error saving data:', error);
+  }
+});
+
+document.getElementById('copyButton').addEventListener('click', () => {
+  const key = document.getElementById('verificationKey').innerText;
+  navigator.clipboard.writeText(key);
+  alert('Verification key copied!');
+});
+
+async function loadData() {
+  try {
+    const response = await fetch(
+      'https://cse598-011-hw2-backend.onrender.com/data'
+    );
+    const data = await response.json();
+    document.getElementById('mainContent').innerHTML = data.content;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadData);
 window.onload = initialize;

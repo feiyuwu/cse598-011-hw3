@@ -23,14 +23,26 @@ body {
 /* Slider Styles */
 .confidence-container {
   margin: 1.5rem 0;
+  width: 100%;
 }
 
 .slider-labels {
   display: flex;
   justify-content: space-between;
+  width: 100%;
   margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #495057;
+}
+
+.slider-labels span {
+  flex: 1;
+}
+
+.slider-labels span:first-child {
+  text-align: left;
+}
+
+.slider-labels span:last-child {
+  text-align: right;
 }
 
 .form-range {
@@ -43,6 +55,7 @@ body {
   font-weight: 600;
   color: #0d6efd;
   text-align: center;
+  margin-top: 0.5rem;
 }
 
 /* Reason Selection */
