@@ -192,13 +192,19 @@ document.getElementById('copyButton').addEventListener('click', () => {
   alert('Verification key copied!');
 });
 
-async function loadData() {
+// ✅ Function to load data using a stored key
+async function loadData(key) {
   try {
     const response = await fetch(
-      'https://cse598-011-hw2-backend.onrender.com/data'
+      `https://cse598-011-hw2-backend.onrender.com/data/${key}`
     );
     const data = await response.json();
-    document.getElementById('mainContent').innerHTML = data.content;
+
+    if (data.content) {
+      document.getElementById('mainContent').innerHTML = data.content;
+    } else {
+      console.log('No data found for key:', key);
+    }
   } catch (error) {
     console.error('Error fetching data:', error);
   }
