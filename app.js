@@ -208,7 +208,9 @@ async function loadAllData() {
 
     Object.entries(data).forEach(([key, content]) => {
       const entry = document.createElement('div');
-      entry.innerHTML = `<strong>Key:</strong> ${key} <br> <strong>Content:</strong> ${content}<br>
+      entry.innerHTML = `
+              <strong>Key:</strong> ${key} <br>
+              <strong>Content:</strong> ${content}<br>
               <button onclick="loadDataByKey('${key}')">View</button><hr>`;
       dataContainer.appendChild(entry);
     });
@@ -217,10 +219,10 @@ async function loadAllData() {
   }
 }
 
-// ✅ Fetch stored content by key
+// ✅ Ensure key is correctly passed when calling loadDataByKey
 async function loadDataByKey(key) {
-  if (!key) {
-    console.error('No key provided for fetching data.');
+  if (!key || typeof key !== 'string') {
+    console.error('Invalid key provided for fetching data:', key);
     return;
   }
 
