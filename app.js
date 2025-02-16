@@ -181,6 +181,9 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
     document.getElementById('verificationKey').innerText = key;
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('completionPage').style.display = 'block';
+
+    // ✅ Automatically reload stored data
+    loadAllData();
   } catch (error) {
     console.error('Error saving data:', error);
   }
@@ -192,8 +195,35 @@ document.getElementById('copyButton').addEventListener('click', () => {
   alert('Verification key copied!');
 });
 
-// ✅ Function to load data using a stored key
-async function loadData(key) {
+// ✅ Fetch all stored key-content pairs and display them
+async function loadAllData() {
+  try {
+    const response = await fetch(
+      'https://cse598-011-hw2-backend.onrender.com/data'
+    );
+    const data = await response.json();
+
+    const dataContainer = document.getElementById('dataDisplay');
+    dataContainer.innerHTML = '<h3>Stored Data:</h3>';
+
+    Object.entries(data).forEach(([key, content]) => {
+      const entry = document.createElement('div');
+      entry.innerHTML = `<strong>Key:</strong> ${key} <br> <strong>Content:</strong> ${content}<br>
+              <button onclick="loadDataByKey('${key}')">View</button><hr>`;
+      dataContainer.appendChild(entry);
+    });
+  } catch (error) {
+    console.error('Error fetching all data:', error);
+  }
+}
+
+// ✅ Fetch stored content by key
+async function loadDataByKey(key) {
+  if (!key) {
+    console.error('No key provided for fetching data.');
+    return;
+  }
+
   try {
     const response = await fetch(
       `https://cse598-011-hw2-backend.onrender.com/data/${key}`
@@ -206,9 +236,11 @@ async function loadData(key) {
       console.log('No data found for key:', key);
     }
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error('Error fetching data by key:', error);
   }
 }
 
-document.addEventListener('DOMContentLoaded', loadData);
+// ✅ Load all stored key-content pairs when the page loads
+document.addEventListener('DOMContentLoaded', loadAllData);
+
 window.onload = initialize;
