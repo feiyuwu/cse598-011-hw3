@@ -165,28 +165,60 @@ function showCopyFeedback() {
 
 document.getElementById('submitBtn').addEventListener('click', async () => {
   const key = 'user-' + Math.random().toString(36).substring(2, 10);
-  const content = document.getElementById('mainContent').innerHTML;
+  const dataToSend = [];
+
+  document.querySelectorAll('.image-card').forEach((card, index) => {
+    const imgSrc = card.querySelector('.image-preview').src;
+    const imageNumber = imgSrc.match(/(\d+)\.png$/)[1]; // Extract image number
+
+    const confidence = document
+      .getElementById(`confidence${index}`)
+      .textContent.replace('%', '');
+
+    // Collect selected AI indicators
+    const aiReasons = [];
+    REASONS.ai.forEach((reason) => {
+      if (document.getElementById(`ai_${index}_${reason}`).checked) {
+        aiReasons.push(reason);
+      }
+    });
+
+    // Collect selected Real indicators
+    const realReasons = [];
+    REASONS.real.forEach((reason) => {
+      if (document.getElementById(`real_${index}_${reason}`).checked) {
+        realReasons.push(reason);
+      }
+    });
+
+    dataToSend.push({
+      key,
+      image: imageNumber,
+      confidence,
+      aiReasons,
+      realReasons,
+    });
+  });
 
   try {
-    // ✅ Send only the new data to the backend
-    const response = await fetch(
-      'https://cse598-011-hw2-backend.onrender.com/save',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key, content }),
-      }
-    );
+    for (let entry of dataToSend) {
+      await fetch(
+        'https://script.google.com/macros/s/AKfycbxOsdmo2U58rfOiJDBO0Uwv84I41Z_iMmZxgKOBW1J27kSO2Pr6RHiLw954IyxLLGwH1g/exec',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entry),
+        }
+      );
+    }
 
-    const result = await response.json();
-    console.log('✅ Data saved:', result);
+    console.log('✅ Data saved to Google Sheets');
 
-    // ✅ Show verification key without modifying frontend structure
     document.getElementById('verificationKey').innerText = key;
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('completionPage').style.display = 'block';
   } catch (error) {
-    console.error('Error saving data:', error);
+    console.error('❌ Error saving data:', error);
   }
 });
 
