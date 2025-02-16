@@ -168,86 +168,26 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
   const content = document.getElementById('mainContent').innerHTML;
 
   try {
-    // Step 1: Fetch existing data
+    // ✅ Send only the new data to the backend
     const response = await fetch(
-      'https://cse598-011-hw2-backend.onrender.com/data'
+      'https://cse598-011-hw2-backend.onrender.com/save',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, content }),
+      }
     );
-    let existingData = [];
 
-    if (response.ok) {
-      existingData = await response.json();
-    }
+    const result = await response.json();
+    console.log('✅ Data saved:', result);
 
-    // Step 2: Append new entry
-    existingData.push({ key, content });
-
-    // Step 3: Send updated data back to backend
-    await fetch('https://cse598-011-hw2-backend.onrender.com/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(existingData), // Send the entire updated array
-    });
-
-    // Step 4: Update the UI
+    // ✅ Show verification key without modifying frontend structure
     document.getElementById('verificationKey').innerText = key;
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('completionPage').style.display = 'block';
-
-    // Step 5: Reload stored data
-    loadAllData();
   } catch (error) {
     console.error('Error saving data:', error);
   }
 });
-
-// ✅ Fetch all stored key-content pairs and display them
-async function loadAllData() {
-  try {
-    const response = await fetch(
-      'https://cse598-011-hw2-backend.onrender.com/data'
-    );
-    const data = await response.json();
-
-    const dataContainer = document.getElementById('dataDisplay');
-    dataContainer.innerHTML = '<h3>Stored Data:</h3>';
-
-    data.forEach(({ key, content }) => {
-      const entry = document.createElement('div');
-      entry.innerHTML = `
-              <strong>Key:</strong> ${key} <br>
-              <strong>Content:</strong> ${content}<br>
-              <button onclick="loadDataByKey('${key}')">View</button><hr>`;
-      dataContainer.appendChild(entry);
-    });
-  } catch (error) {
-    console.error('Error fetching all data:', error);
-  }
-}
-
-// ✅ Ensure key is correctly passed when calling loadDataByKey
-async function loadDataByKey(key) {
-  if (!key || typeof key !== 'string') {
-    console.error('Invalid key provided for fetching data:', key);
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      `https://cse598-011-hw2-backend.onrender.com/data/${key}`
-    );
-    const data = await response.json();
-
-    if (data.content) {
-      document.getElementById('mainContent').innerHTML = data.content;
-    } else {
-      console.log('No data found for key:', key);
-    }
-  } catch (error) {
-    console.error('Error fetching data by key:', error);
-  }
-}
-
-// ✅ Load all stored key-content pairs when the page loads
-document.addEventListener('DOMContentLoaded', loadAllData);
 
 window.onload = initialize;
