@@ -203,7 +203,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
   try {
     for (let entry of dataToSend) {
       await fetch(
-        'https://script.google.com/macros/s/AKfycbyGGuQklj-MY5jNwJvxb1-Gm1RLo-ZEmBwAaDpiyzardrI9mKi2GElfCBtL4g0RebHX/exec',
+        'https://script.google.com/macros/s/AKfycbw3NQdfn9BoPTcSSg0W0hKC0s4tEHArvWwD6oNVaM1gO5VySAA_nq2QmNeQaTbGOV_BkA/exec',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
