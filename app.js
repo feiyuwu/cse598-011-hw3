@@ -168,31 +168,36 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
   const content = document.getElementById('mainContent').innerHTML;
 
   try {
+    // Step 1: Fetch existing data
     const response = await fetch(
-      'https://cse598-011-hw2-backend.onrender.com/save',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key, content }),
-      }
+      'https://cse598-011-hw2-backend.onrender.com/data'
     );
+    let existingData = [];
 
-    const result = await response.json();
+    if (response.ok) {
+      existingData = await response.json();
+    }
+
+    // Step 2: Append new entry
+    existingData.push({ key, content });
+
+    // Step 3: Send updated data back to backend
+    await fetch('https://cse598-011-hw2-backend.onrender.com/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(existingData), // Send the entire updated array
+    });
+
+    // Step 4: Update the UI
     document.getElementById('verificationKey').innerText = key;
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('completionPage').style.display = 'block';
 
-    // ✅ Automatically reload stored data
+    // Step 5: Reload stored data
     loadAllData();
   } catch (error) {
     console.error('Error saving data:', error);
   }
-});
-
-document.getElementById('copyButton').addEventListener('click', () => {
-  const key = document.getElementById('verificationKey').innerText;
-  navigator.clipboard.writeText(key);
-  alert('Verification key copied!');
 });
 
 // ✅ Fetch all stored key-content pairs and display them
@@ -206,7 +211,7 @@ async function loadAllData() {
     const dataContainer = document.getElementById('dataDisplay');
     dataContainer.innerHTML = '<h3>Stored Data:</h3>';
 
-    Object.entries(data).forEach(([key, content]) => {
+    data.forEach(({ key, content }) => {
       const entry = document.createElement('div');
       entry.innerHTML = `
               <strong>Key:</strong> ${key} <br>
