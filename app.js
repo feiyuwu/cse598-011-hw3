@@ -25,10 +25,6 @@ function initialize() {
     const card = createImageCard(imgNumber, index);
     container.appendChild(card);
   });
-
-  document
-    .getElementById('submitBtn')
-    .addEventListener('click', handleSubmission);
 }
 
 function getRandomImages() {
@@ -164,35 +160,35 @@ function showCopyFeedback() {
 }
 
 document.getElementById('submitBtn').addEventListener('click', async () => {
-  const key = 'user-' + Math.random().toString(36).substring(2, 10);
+  // Generate the key once and use it everywhere
+  globalVerificationKey = generateVerificationKey();
+  document.getElementById('verificationKey').textContent =
+    globalVerificationKey;
+
   const dataToSend = [];
 
   document.querySelectorAll('.image-card').forEach((card, index) => {
     const imgSrc = card.querySelector('.image-preview').src;
-    const imageNumber = imgSrc.match(/(\d+)\.png$/)[1]; // Extract image number
+    const imageNumberMatch = imgSrc.match(/(\d+)\.png$/);
+    if (!imageNumberMatch) return; // Skip invalid images
+    const imageNumber = imageNumberMatch[1];
 
-    const confidence = document
-      .getElementById(`confidence${index}`)
-      .textContent.replace('%', '');
+    const confidence = parseFloat(
+      document.getElementById(`confidence${index}`).textContent.replace('%', '')
+    );
 
     // Collect selected AI indicators
-    const aiReasons = [];
-    REASONS.ai.forEach((reason) => {
-      if (document.getElementById(`ai_${index}_${reason}`).checked) {
-        aiReasons.push(reason);
-      }
-    });
+    const aiReasons = REASONS.ai.filter(
+      (reason) => document.getElementById(`ai_${index}_${reason}`).checked
+    );
 
     // Collect selected Real indicators
-    const realReasons = [];
-    REASONS.real.forEach((reason) => {
-      if (document.getElementById(`real_${index}_${reason}`).checked) {
-        realReasons.push(reason);
-      }
-    });
+    const realReasons = REASONS.real.filter(
+      (reason) => document.getElementById(`real_${index}_${reason}`).checked
+    );
 
     dataToSend.push({
-      key,
+      key: globalVerificationKey,
       image: imageNumber,
       confidence,
       aiReasons,
@@ -200,23 +196,27 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
     });
   });
 
+  if (dataToSend.length === 0) {
+    alert('⚠️ No valid data to submit.');
+    return;
+  }
+
   try {
-    for (let entry of dataToSend) {
-      await fetch(
-        'https://script.google.com/macros/s/AKfycbw3NQdfn9BoPTcSSg0W0hKC0s4tEHArvWwD6oNVaM1gO5VySAA_nq2QmNeQaTbGOV_BkA/exec',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(entry),
-        }
-      );
-    }
+    const response = await fetch(
+      'https://script.google.com/macros/s/AKfycbze4M2Ifdc4JnAnJv-F1EN_Q7CLbM1Rf3DWG5iljjphrP8oehkpLJqAXYbWHYB-CujD/exec',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ key: globalVerificationKey, data: dataToSend }),
+      }
+    );
 
-    console.log('✅ Data saved to Google Sheets');
+    const result = await response.json();
+    console.log('✅ Data saved:', result);
 
-    document.getElementById('verificationKey').innerText = key;
+    // ✅ Show completion page AFTER successful submission
     document.getElementById('mainContent').style.display = 'none';
-    document.getElementById('completionPage').style.display = 'block';
+    document.getElementById('completionPage').style.display = 'flex';
   } catch (error) {
     console.error('❌ Error saving data:', error);
   }
