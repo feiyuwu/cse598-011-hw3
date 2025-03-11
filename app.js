@@ -95,6 +95,15 @@ function createImageCard(imgNumber, index) {
                       .join('')}
                 </div>
             </div>
+
+            <!-- Ask AI Button -->
+            <div class="text-center mt-3">
+                <button class="btn btn-info" onclick="askAI(${index}, ${imgNumber})">Ask the AI</button>
+            </div>
+            <div class="ai-response mt-3 p-2 bg-light border rounded" id="aiResponse${index}" style="display: none;">
+                <strong>AI Response:</strong>
+                <p id="aiResponseText${index}"></p>
+            </div>
         </div>
     `;
   return card;
@@ -157,6 +166,49 @@ function showCopyFeedback() {
   setTimeout(() => {
     btn.textContent = 'Copy Key';
   }, 2000);
+}
+
+const backendUrl =
+  'https://cse598-mturk-backend-rmpsozbt0-fei-wus-projects.vercel.app'; // Update with your deployed URL
+
+async function askAI(index, imgNumber) {
+  const confidence = parseFloat(
+    document.getElementById(`confidence${index}`).textContent.replace('%', '')
+  );
+
+  const aiReasons = REASONS.ai.filter(
+    (reason) => document.getElementById(`ai_${index}_${reason}`).checked
+  );
+
+  const realReasons = REASONS.real.filter(
+    (reason) => document.getElementById(`real_${index}_${reason}`).checked
+  );
+
+  const requestData = {
+    image: `data/images/${imgNumber}.png`,
+    confidence,
+    aiReasons,
+    realReasons,
+  };
+
+  document.getElementById(`aiResponse${index}`).style.display = 'block';
+  document.getElementById(`aiResponseText${index}`).textContent =
+    'Evaluating...';
+
+  try {
+    const response = await fetch(`${backendUrl}/api/evaluate-selection`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestData),
+    });
+
+    const result = await response.json();
+    document.getElementById(`aiResponseText${index}`).textContent =
+      result.evaluation;
+  } catch (error) {
+    document.getElementById(`aiResponseText${index}`).textContent =
+      'Error processing AI evaluation.';
+  }
 }
 
 document.getElementById('submitBtn').addEventListener('click', async () => {
