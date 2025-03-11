@@ -60,7 +60,7 @@ function createImageCard(imgNumber, index) {
                 </div>
             </div>
 
-            <div class="reason-section">
+            <div class="reason-section">f
                 <div class="ai-reasons">
                     <div class="small text-muted mb-2">Select AI indicators if observed</div>
                     ${REASONS.ai
@@ -169,7 +169,7 @@ function showCopyFeedback() {
 }
 
 const backendUrl =
-  'https://cse598-mturk-backend-rmpsozbt0-fei-wus-projects.vercel.app'; // Update with your deployed URL
+  'https://cse598-mturk-backend-hz7uvoksj-fei-wus-projects.vercel.app'; // Update with your deployed URL
 
 async function askAI(index, imgNumber) {
   const confidence = parseFloat(
@@ -206,6 +206,7 @@ async function askAI(index, imgNumber) {
     document.getElementById(`aiResponseText${index}`).textContent =
       result.evaluation;
   } catch (error) {
+    console.log(error);
     document.getElementById(`aiResponseText${index}`).textContent =
       'Error processing AI evaluation.';
   }
