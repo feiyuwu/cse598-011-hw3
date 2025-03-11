@@ -60,7 +60,7 @@ function createImageCard(imgNumber, index) {
                 </div>
             </div>
 
-            <div class="reason-section">f
+            <div class="reason-section">
                 <div class="ai-reasons">
                     <div class="small text-muted mb-2">Select AI indicators if observed</div>
                     ${REASONS.ai
