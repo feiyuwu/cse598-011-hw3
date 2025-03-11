@@ -168,8 +168,7 @@ function showCopyFeedback() {
   }, 2000);
 }
 
-const backendUrl =
-  'https://cse598-mturk-backend-hz7uvoksj-fei-wus-projects.vercel.app'; // Update with your deployed URL
+const backendUrl = 'https://cse598-011-hw2-backend.onrender.com'; // Update with your deployed URL
 
 async function askAI(index, imgNumber) {
   const confidence = parseFloat(
@@ -185,7 +184,7 @@ async function askAI(index, imgNumber) {
   );
 
   const requestData = {
-    image: `data/images/${imgNumber}.png`,
+    imageUrl: `https://cse598hw2.s3.us-east-2.amazonaws.com/${imgNumber}.png`,
     confidence,
     aiReasons,
     realReasons,
@@ -196,6 +195,7 @@ async function askAI(index, imgNumber) {
     'Evaluating...';
 
   try {
+    console.log(requestData);
     const response = await fetch(`${backendUrl}/api/evaluate-selection`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
